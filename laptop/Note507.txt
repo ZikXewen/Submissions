@@ -1,5 +1,0 @@
-dp(EndingPoint)
-case 1 : + in
-case 2 : max<0 -> start again
-
-ans: max case (if -, "no nice part")

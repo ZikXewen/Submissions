@@ -1,28 +1,27 @@
-#include <bits/stdc++.h>
+#include<iostream>
+#include<queue>
 using namespace std;
-string s,t;
-const int mxn = 3e5+5 , mxk = 30;
-int n,cur,as[mxk][mxn],fd[mxk],ret,fw[mxn];
-void ud(int x){for(;x<=mxn;x+=-x&x) fw[x]++;}
-int gt(int x){int ret=0; for(;x;x-=-x&x) ret+=fw[x]; return ret;}
+int T,ft[300005];
+long long sm;
+string s,p;
+queue<int> v[30];
+void ud(int idx){
+	for(;idx<=s.size();idx+=-idx&idx) ft[idx]++;
+}
+int qr(int idx){
+	int ret=0;
+	for(;idx>0;idx-=-idx&idx) ret+=ft[idx];
+	return ret;
+}
 int main(){
 	ios_base::sync_with_stdio(false); cin.tie(NULL);
-	cin >> n >> s >> t;
-	for(auto i:s) { // O(kn)
-		for(int j=0;j<mxk;j++) as[j][cur+1]=as[j][cur];
-		as[i-'a'][++cur]++;
-	} cur++;
-	for(auto i:t){ //O(nlogn)
-		i-='a';
-		int x = lower_bound(as[i],as[i]+cur,++fd[i])-as[i];
-		if(x==cur) {ret=-1; break;}
-		ret+=x;
-		if(n) ret-=gt(x), ud(x);
+	cin >> T >> s >> p;
+	for(int i=0;i<s.size();i++) v[s[i]-'a'].push(i+1);
+	for(char i:p){
+		if(v[i-'a'].empty()){printf("-1"); return 0;}
+		int tem=v[i-'a'].front();  v[i-'a'].pop();
+		sm+=tem;
+		if(T) {sm-=qr(tem); ud(tem);}
 	}
-	cout << ret;
+	cout << sm;
 }
-/*
-1
-aaaaffffaaaa
-fafafafa
-*/
