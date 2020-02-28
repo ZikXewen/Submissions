@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 const int X = 1e5 + 5;
-int N, M, Q, ct, low[X], pre[X];
+int N, M, Q, ct, low[X], pre[X], anc[X][(int) log2(X)], lv[X];
 bool ap[X];
 vector<vector<int>> g(X), cc;
 vector<int> sz;
@@ -33,10 +33,21 @@ void bct(){
 			else id[v] = ct;
 	}
 }
+void plca(int u = 1, int p = 0){
+	for(int i = 1; i <= log2(ct); ++i) ans[u][i] = anc[anc[u][i - 1]][i - 1];
+	for(int v: g[u]) if(v != p) ans[v][0] = u, lv[v] = lv[u] + 1, plca(v, u);
+}
+int lca(int u, int v){
+	if(lv[u] < lv[v]) swap(u, v);
+	for(int i = log2(ct); i >= 0; --i) if(lv[anc[u][i]] >= lv[v]) u = anc[u][i];
+	if(u == v) return u;
+	for(int i = log2(ct); i >= 0; --i) if(anc[u][i] != anc[v][i]) u = anc[u][i], v = anc[v][i];
+	return anc[u][0];
+}
 int main(){
 	ios::sync_with_stdio(0), cin.tie(0);
 	cin >> N >> M >> Q;
 	for(int i = 0, u, v; i < M; ++i) cin >> u >> v, g[u].emplace_back(v), g[v].emplace_back(u);
-	grp(); bct();
-	for(int i = 0, u, v; i < Q; ++i) cin >> u >> v;
+	grp(); bct(); plca();
+	for(int i = 0, u, v; i < Q; ++i) cin >> u >> v, cout << lca(id[u], id[v]);
 }
