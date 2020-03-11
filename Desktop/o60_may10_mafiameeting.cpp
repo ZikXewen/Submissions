@@ -2,19 +2,20 @@
 #define vi vector<int>
 using namespace std;
 const int X = 2e5 + 5;
-int N, M, Q, ct, low[X], pre[X], anc[X][(int) log2(X)], lv[X], ds[X], id[X];
+int N, M, Q, ct, low[X], pre[X], anc[X][(int) log2(X) + 1], lv[X], ds[X], id[X];
 bitset<X> ap, vs;
 vector<vi> g(X), cc;
 vi sz;
 stack<int> stk;
 void grp(int u = 1, int p = 0){
+	int cd = 0;
 	low[u] = pre[u] = ++ct;
 	stk.emplace(u);
 	for(int v: g[u]){
 		if(!pre[v]){
-			grp(v, u);
+			grp(v, u); ++cd;
 			low[u] = min(low[u], low[v]);
-			if(low[v] >= pre[u] || (!p && g[u].size() > 1)){
+			if((p && low[v] >= pre[u]) || (!p && cd > 1)){
 				ap[u] = 1;
 				cc.emplace_back(vi(1, u));
 				while(cc.back().back() != v) cc.back().emplace_back(stk.top()), stk.pop();
@@ -59,6 +60,9 @@ int main(){
 	ios::sync_with_stdio(0), cin.tie(0);
 	cin >> N >> M >> Q;
 	for(int i = 0, u, v; i < M; ++i) cin >> u >> v, g[u].emplace_back(v), g[v].emplace_back(u);
-	grp(); bct(); vs[0] = 1, ds[1] = sz[1], dfs(); plca();
+	grp();
+	if(stk.size()) cc.emplace_back(vi());
+	while(stk.size()) cc.back().emplace_back(stk.top()), stk.pop();
+	bct(); vs[0] = 1, ds[1] = sz[1], dfs(); plca();
 	for(int i = 0, u, v; i < Q; ++i) cin >> u >> v, cout << calc(id[u], id[v]) << '\n';
 }
