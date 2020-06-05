@@ -6,29 +6,37 @@ struct ii{
 	ii(long u, long v) : x(u), y(v) {};
 	//bool operator<(ii v){return x < v.x || (x == v.x && y < v.y);}
 };
+const ii INF(1e6 + 1, 1e6 + 1);
+bool operator==(const ii &u, const ii &v){return u.x == v.x;}
+double dis(ii u, ii v){return (u == INF)? 0 : sqrt((u.x - v.x) * (u.x - v.x) + (u.y - v.y) * (u.y - v.y));}
+
 struct one{
 	int sz, prio;
 	ii va;
 	double sm;
-	one *l, *r;
-	one(int u, int v) : va(u, v), sz(1), sm(0), l(0), r(0), prio(rand()) {};
+	one *l, *r, *p, *ll, *rr;
+	one(int u, int v) : va(u, v), sz(1), sm(0), l(0), r(0), p(0), rr(this), ll(this), prio(rand()) {};
 } *tr;
 int _sz(one *u){return u? u -> sz : 0;}
-//ii _va(one *u){return u? u -> va : }
+ii _va(one *u){return u? u -> va : INF;}
 double _sm(one *u){return u? u -> sm : 0;}
 void ud(one *u){
 	if(!u) return;
+	//if(u -> l) u -> l -> p = u -> p;
+	//if(u -> r) u -> r -> p = u;
+    u -> ll = u -> l? u -> l -> ll : u;
+	u -> rr = u -> r? u -> r -> rr : u;
 	u -> sz = _sz(u -> l) + _sz(u -> r) + 1;
-	u -> sm = _sm(u -> l) + _sm(u -> r) /*+ u -> va*/;
+	u -> sm = _sm(u -> l) + _sm(u -> r) + dis((u -> l)? _va(u -> l -> rr) : INF, u -> va) + dis((u -> r)? _va(u -> r -> ll) : INF, u -> va);
 }
-ii _vat(int po, one *now = tr){ // value of now(tr) @ po
-	if(!now) return ii(-1, -1);
-	if(_sz(now -> l) == po) return now -> va;
+one* _vat(int po, one *now = tr){ // value of now(tr) @ po
+	if(!now) return nullptr;
+	if(_sz(now -> l) == po) return now;
 	if(_sz(now -> l) > po) return _vat(po, now -> l);
 	return _vat(po - _sz(now -> l) - 1, now -> r);
 }
 void mrg(one *l, one *r, one *&u){
-	if(!l || !r) {u = (l? l : r); return;} 
+	if(!l or !r) {u = l? l : r;  return;} 
 	if(l -> prio < r -> prio) mrg(l -> r, r, l -> r), u = l;
 	else mrg(l, r -> l, r -> l), u = r;
 	ud(u);
@@ -37,27 +45,39 @@ void spl(one *u, one *&l, one *&r, int va){
 	if(!u) {l = r = NULL; return;}
 	if(_sz(u -> l) <= va) spl(u -> r, u -> r, r, va - _sz(u -> l) - 1), l = u;
 	else spl(u -> l, l, u -> l, va), r = u;
-	ud(u);
+	ud(u); ud(l); ud(r);
 }
-void prnt(one *nw = tr){
-	if(!nw) return;
-	prnt(nw -> l);
-	cout << nw -> va.x << ' ' << nw -> va.y << '\n';
-	//cout << nw -> sz;
-	prnt(nw -> r);
+
+void prnt(one *u = tr){
+	if(!u) return;
+	cout << 'L'; prnt(u -> l); cout << "-L";
+	cout << u -> va.x << ' ' << u -> va.y << '\n';
+    cout << 'R'; prnt(u -> r); cout << "-R";
 }
+
 double sm;
 int N;
 long ori(ii O, ii A, ii B){return 1ll * (A.x - O.x) * (B.y - O.y) - 1ll * (A.y - O.y) * (B.x - O.x);}
+long ori(one *O, one* A, one *B){return ori(O -> va, A -> va, B -> va);}
+void pat(int u){cout << _va(_vat(u)).x << ' ' << _va(_vat(u)).y << '\n';}
 void ins(long x, long y){
+
+    one *nw = new one(x, y);
+
 	// Base cases
-	if(_sz(tr) < 2) {mrg(tr, new one(x, y), tr); return;}
+	if(_sz(tr) < 2) {mrg(tr, nw, tr); return;}
 	if(_sz(tr) == 2){
-		if(ori(_vat(0), _vat(1), ii(x, y)) <= 0) {mrg(tr, new one(x, y), tr); return;}
-		one *r; spl(tr, tr, r, 0); mrg(tr, new one(x, y), tr); mrg(tr, r, tr); return;
+		one *v0 = _vat(0), *v1 = _vat(1);
+		if(ori(v0, v1, nw) == 0) {
+			if(dis(_va(v0), _va(v1)) + dis(_va(v1), _va(nw)) == dis(_va(v0), _va(nw))) mrg(v0, nw, tr);
+			else if(dis(_va(v0), _va(v1)) + dis(_va(v0), _va(nw)) == dis(_va(v1), _va(nw))) mrg(v1, nw, tr);
+			return;
+		}
+		if(ori(v0, v1, nw) <= 0) {mrg(tr, nw, tr); return;}
+		one *r; spl(tr, tr, r, 0); mrg(tr, nw, tr); mrg(tr, r, tr); return;
 	}
 
-	ii nw(x, y), ftr = _vat(0);
+	one *ftr = _vat(0);
 
 	// Special Case, Need new start
 	if(ori(ftr, _vat(_sz(tr) - 1), nw) <= 0 && ori(ftr, _vat(1), nw) >= 0){ 
@@ -81,14 +101,14 @@ void ins(long x, long y){
 			if(ori(ftr, _vat(m), nw) <= 0) ml = m; // Last left
 			else mr = m - 1;
 		}
-		if(ori(_vat(ml), _vat((ml + 1) % _sz(tr)), nw) <= 0) return; // Inside the shape
+		if(ori(_vat(ml), _vat((ml + 1) % _sz(tr)), nw) < 0) return; // Inside the shape
 	}
-
+    //pat(0);
 	// Find Left to delete
 	int ll = 0, lr = ml;
 	while(ll < lr){
 		int m = (ll + lr) >> 1;
-		if(ori(_vat(m), _vat((m + 1) % _sz(tr)), nw) < 0) ll = m + 1; // First right
+		if(ori(_vat(m), _vat((m + 1) % _sz(tr)), nw) < 0) ll = m + 1; // First right/equ
 		else lr = m;
 	}
 
@@ -96,26 +116,25 @@ void ins(long x, long y){
 	int rl = ml + 1, rr = _sz(tr) - 1;
 	while(rl < rr){
 		int m = (rl + rr) >> 1;
-		if(ori(_vat((m + 1) % _sz(tr)), _vat(m), nw) < 0) rl = m + 1; // First right
+		if(ori(_vat((m + 1) % _sz(tr)), _vat(m), nw) <= 0) rl = m + 1; // last right/equ!
 		else rr = m;
 	}
-
-	prnt(); cout << '\n';
 
 	// Cuts & Insert
 	one *rt, *lt, *nt = new one(x, y);
 	spl(tr, tr, rt, rl - 1); spl(tr, lt, tr, ll);
 	mrg(lt, nt, tr), mrg(tr, rt, tr);
-
-	cout << ":" << ml << '\n'; prnt(); cout << '\n';
 }
 
 int main(){
 	ios::sync_with_stdio(0), cin.tie(0), srand(time(0));
+	cout << fixed << setprecision(6);
 	cin >> N;
 	for(int i = 0, x, y; i < N; ++i){
 		cin >> x >> y;
 		ins(x, y);
-		//cout << tr -> sz << '\n';
+		//prnt();
+		cout << _sm(tr) + dis(_va(tr -> ll), _va(tr -> rr)) << "\n";
 	}
+	//prnt();
 }
