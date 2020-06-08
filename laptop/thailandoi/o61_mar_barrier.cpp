@@ -1,10 +1,10 @@
 // TREAP + CONVEX HULL
 #include <bits/stdc++.h>
+#define long long long
 using namespace std;
 struct ii{
 	long x, y;
 	ii(long u, long v) : x(u), y(v) {};
-	//bool operator<(ii v){return x < v.x || (x == v.x && y < v.y);}
 };
 const ii INF(1e6 + 1, 1e6 + 1);
 bool operator==(const ii &u, const ii &v){return u.x == v.x;}
@@ -22,9 +22,7 @@ ii _va(one *u){return u? u -> va : INF;}
 double _sm(one *u){return u? u -> sm : 0;}
 void ud(one *u){
 	if(!u) return;
-	//if(u -> l) u -> l -> p = u -> p;
-	//if(u -> r) u -> r -> p = u;
-    u -> ll = u -> l? u -> l -> ll : u;
+	u -> ll = u -> l? u -> l -> ll : u;
 	u -> rr = u -> r? u -> r -> rr : u;
 	u -> sz = _sz(u -> l) + _sz(u -> r) + 1;
 	u -> sm = _sm(u -> l) + _sm(u -> r) + dis((u -> l)? _va(u -> l -> rr) : INF, u -> va) + dis((u -> r)? _va(u -> r -> ll) : INF, u -> va);
@@ -48,18 +46,10 @@ void spl(one *u, one *&l, one *&r, int va){
 	ud(u); ud(l); ud(r);
 }
 
-void prnt(one *u = tr){
-	if(!u) return;
-	cout << 'L'; prnt(u -> l); cout << "-L";
-	cout << u -> va.x << ' ' << u -> va.y << '\n';
-    cout << 'R'; prnt(u -> r); cout << "-R";
-}
-
 double sm;
 int N;
-long ori(ii O, ii A, ii B){return 1ll * (A.x - O.x) * (B.y - O.y) - 1ll * (A.y - O.y) * (B.x - O.x);}
+long ori(ii O, ii A, ii B){return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);}
 long ori(one *O, one* A, one *B){return ori(O -> va, A -> va, B -> va);}
-void pat(int u){cout << _va(_vat(u)).x << ' ' << _va(_vat(u)).y << '\n';}
 void ins(long x, long y){
 
     one *nw = new one(x, y);
@@ -73,8 +63,8 @@ void ins(long x, long y){
 			else if(dis(_va(v0), _va(v1)) + dis(_va(v0), _va(nw)) == dis(_va(v1), _va(nw))) mrg(v1, nw, tr);
 			return;
 		}
-		if(ori(v0, v1, nw) <= 0) {mrg(tr, nw, tr); return;}
-		one *r; spl(tr, tr, r, 0); mrg(tr, nw, tr); mrg(tr, r, tr); return;
+		if(ori(v0, v1, nw) < 0) {mrg(tr, nw, tr); return;}
+		mrg(v0, nw, tr); mrg(tr, v1, tr); return;
 	}
 
 	one *ftr = _vat(0);
@@ -93,7 +83,7 @@ void ins(long x, long y){
 	}
 
 	// Find Mid
-	int ml = 1, mr = _sz(tr) - 1;
+	int ml = 0, mr = _sz(tr) - 1;
 	if(ori(ftr, _vat(1), nw) > 0) ml = 0;
 	else{
 		while(ml < mr){
@@ -103,7 +93,7 @@ void ins(long x, long y){
 		}
 		if(ori(_vat(ml), _vat((ml + 1) % _sz(tr)), nw) < 0) return; // Inside the shape
 	}
-    //pat(0);
+    
 	// Find Left to delete
 	int ll = 0, lr = ml;
 	while(ll < lr){
@@ -116,7 +106,7 @@ void ins(long x, long y){
 	int rl = ml + 1, rr = _sz(tr) - 1;
 	while(rl < rr){
 		int m = (rl + rr) >> 1;
-		if(ori(_vat((m + 1) % _sz(tr)), _vat(m), nw) <= 0) rl = m + 1; // last right/equ!
+		if(ori(_vat((m + 1) % _sz(tr)), _vat(m), nw) <= 0) rl = m + 1; // first right only!
 		else rr = m;
 	}
 
@@ -133,8 +123,6 @@ int main(){
 	for(int i = 0, x, y; i < N; ++i){
 		cin >> x >> y;
 		ins(x, y);
-		//prnt();
 		cout << _sm(tr) + dis(_va(tr -> ll), _va(tr -> rr)) << "\n";
 	}
-	//prnt();
 }
