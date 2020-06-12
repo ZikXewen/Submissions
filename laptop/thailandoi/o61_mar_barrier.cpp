@@ -16,6 +16,7 @@ struct one{
 	double sm;
 	one *l, *r, *p, *ll, *rr;
 	one(int u, int v) : va(u, v), sz(1), sm(0), l(0), r(0), p(0), rr(this), ll(this), prio(rand()) {};
+	one(const one *u) : va(u -> va), sz(u -> sz), sm(u -> sm), l(u -> l), r(u -> r), p(u -> p), rr(u -> rr), ll(u -> ll), prio(u -> prio) {}
 } *tr;
 int _sz(one *u){return u? u -> sz : 0;}
 ii _va(one *u){return u? u -> va : INF;}
@@ -57,14 +58,14 @@ void ins(long x, long y){
 	// Base cases
 	if(_sz(tr) < 2) {mrg(tr, nw, tr); return;}
 	if(_sz(tr) == 2){
-		one *v0 = _vat(0), *v1 = _vat(1);
+		one *v0 = new one(_vat(0)), *v1 = new one(_vat(1));
 		if(ori(v0, v1, nw) == 0) {
 			if(dis(_va(v0), _va(v1)) + dis(_va(v1), _va(nw)) == dis(_va(v0), _va(nw))) mrg(v0, nw, tr);
 			else if(dis(_va(v0), _va(v1)) + dis(_va(v0), _va(nw)) == dis(_va(v1), _va(nw))) mrg(v1, nw, tr);
 			return;
 		}
 		if(ori(v0, v1, nw) < 0) {mrg(tr, nw, tr); return;}
-		mrg(v0, nw, tr); mrg(tr, v1, tr); return;
+		one *r; spl(tr, tr, r, 0); mrg(tr, nw, tr); mrg(tr, r, tr); return;
 	}
 
 	one *ftr = _vat(0);
