@@ -7,10 +7,11 @@ vector<pair<int, ii>> rh[X], lh[X];
 
 struct one{
     int cr;
-    vector<int> an, p;
+    vector<int> p;
+    vector<bool> an;
     stack<ii> stk;
 
-    one(int _sz, int _sa) : p(vector<int>(_sz + 1, -1)), cr(0), an(vector<int>(_sa + 1)) {}
+    one(int _sz, int _sa) : p(vector<int>(_sz + 1, -1)), cr(0), an(vector<bool>(_sa + 1)) {}
     int chn(int u, int v){
         stk.emplace(u, p[u]);
         return p[u] = v;
@@ -19,7 +20,7 @@ struct one{
     bool un(ii nw){
         auto [u, v] = nw; u = fd(u), v = fd(v);
         if(u == v) return 0;
-        if(p[u] > p[v]) swap(u, v);
+        if(p[u] < p[v]) swap(u, v);
         chn(v, p[v] + p[u]); chn(u, v);
         ++cr;
         return 1;
@@ -48,7 +49,8 @@ ii g[X];
 
 int main(){
     ios::sync_with_stdio(0), cin.tie(0);
-    freopen("inp.txt", "r", stdin);
+    freopen("disconnected.in", "r", stdin);
+    freopen("disconnected.out", "w", stdout);
     cin >> N >> M;
     fill(l, l + M + 1, 1);
     for(int i = 1, u, v; i <= M; ++i) cin >> u >> v, g[i] = ii(u, v);
