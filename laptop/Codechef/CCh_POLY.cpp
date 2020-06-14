@@ -12,7 +12,7 @@ struct node{
     line va;
     node *l, *r;
     int64 lo, hi;
-    node(int l, int r) : lo(l), hi(r), va(INF, 0, 0, 0), l(0), r(0) {}
+    node(int _l, int _r) : lo(_l), hi(_r), va(INF, 0, 0, 0), l(0), r(0) {}
     void add(line u){
         int m = (lo + hi) >> 1;
         if(u(m) < va(m)) swap(u, va);
