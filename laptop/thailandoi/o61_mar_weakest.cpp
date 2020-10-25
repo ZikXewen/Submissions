@@ -31,7 +31,7 @@ int main(){
     }
     cin >> q >> k >> m >> a1 >> a2; 
     while(q--){
-        cout << (ri = que(a1, a2)) << '\n';
+        cout << (ri = que(a1, a2) % INF) << '\n';
         a1 = a2;
         a2 = (a2 * k + ri) % m % N;
     }
