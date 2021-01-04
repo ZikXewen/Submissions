@@ -1,44 +1,45 @@
 #include <bits/stdc++.h>
+#define ii pair<int, int>
 using namespace std;
-const int X = 1e5 + 5;
-struct one{
-	vector<int> ar;
-	stack<ii> stk;
-	bool ok;
-	one () {}
-	one (int sz, int va) : ar(vector<int>(sz, va)) {};
-	int sz() { return stk.size(); }
-	void put(int po, int va){ stk.emplace(po, ar[po]); ar[po] = va; }
-	void rb(int sz, bool ook) { while(stk.size() > sz) {auto [u, v] = stk.top(); stk.pop(); ar[u] = v;} ok = ook; }
-	int fd(int x) { return (ar[x] < 0)? x : fd(ar[x]); }
-	void un(ii k){
-		int u = fd(k.first), v = fd(k.second);
-		if(u == v) return;
-		if(ar[u] > ar[v]) swap(u, v);
-		put(v, u); put(u, ar[u] + ar[v]);
+const int X = 5e5 + 5;
+class dsu{
+	public:
+	vector<bool> an;
+	vector<int> p;
+	vector<ii> g;
+	vector<vector<ii>> lv, rv;
+	stack<ii> rbp;
+	int ct;
+	dsu(int sz) : p(sz + 1) {}
+	void setsz(int sz) {
+		g.resize(sz); lv.resize(sz); rv.resize(sz); an.resize(sz);
 	}
-} dsu;
-vector<ii> ed, rgt[X], lft[X];
-int N, M, K, C;
-map<int, int> st;
+	void sol(int l = 0, int r = X - 1){
+		if(l == r) return an[l] = (ct == p.size() - 1), void();
+
+	}
+};
+vector<int> lef;
+int N, M, Q;
 int main(){
 	ios::sync_with_stdio(0), cin.tie(0);
 	cin >> N >> M;
-	for(int i = 1, u, v; i <= M; ++i){
-		cin >> u >> v; ii p(u, v);
-		ed.emplace_back(p);
-	}
-	cin >> K;
-	dsu = one(N + 1, -1);
-	for(int i = 1, ct = M, u; i <= K; ++i) {
-		cin >> C;
-		for(int j = 0; j < C; ++j){
-			cin >> u;
-			rgt[i].emplace_back(st[u], u);
-			if(i < K) lft[st[u]].emplace_back(i + 1, u);
-			st[u] = i + 1;
+	dsu one(N);
+	for(int i = 0, u, v; i < M; ++i) cin >> u >> v, one.g.emplace_back(u, v);
+	cin >> Q;
+	one.setsz(Q);
+	for(int i = 0, u; i < Q; ++i){
+		cin >> u;
+		for(int j = 0, v; j < u; ++j) {
+			cin >> v;
+			if(lef[v] != i)
+				one.lv[i - 1].emplace_back(lef[v], v),
+				one.rv[lef[v]].emplace_back(i - 1, v);
+			lef[v] = i + 1;
 		}
 	}
-	for(int i = 1; i <= M; ++i) if(st[i] <= K) rgt[K + 1].emplace_back(st[i], i), lft[st[i]].emplace_back(K + 1, i);
-	sol(0, K + 1, 0);
+	for(int i = 0; i < N; ++i)
+		one.lv[Q].emplace_back(lef[i], i),
+		one.rv[lef[i]].emplace_back(Q, i);
+	one.sol();
 }
