@@ -1,5 +1,8 @@
+.gitignore
 a.exe
 .vscode
 Temp/
 in
 out
+laptop/apio21/defence/
+laptop/thailandoi/o64_may*
